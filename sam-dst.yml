@@ -25,7 +25,7 @@ Resources:
         - Sid: B
           Effect: Allow
           Principal:
-            AWS: !Sub 'arn:aws:iam::${ExternalAccountId}:root'
+            AWS: !Sub 'arn:aws:iam::${ExternalAccountId}:role/SrcTestRole'
           Action: kms:*
           Resource: '*'
         - Sid: A
