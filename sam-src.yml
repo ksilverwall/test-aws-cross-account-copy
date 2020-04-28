@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "Create Lambda Function"
+
+Parameters:
+  DstBucketName:
+    Type: String
+  KmsArn:
+    Type: String
+
+Globals:
+  Function:
+    Runtime: python3.8
+    Timeout: 30
+    Handler: index.lambda_handler
+
+Resources:
+  SrcTestRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  SrcTestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          DestinationBucketName: !Ref DstBucketName
+          DestinationPrefix: sources
+          KmsArn: !Ref KmsArn
+      CodeUri: lambda/test_src
+      Role: !GetAtt SrcTestRole.Arn

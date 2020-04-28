@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: CloudFormation Template for ebis deploy
+
+Parameters:
+  DstBucketName:
+    Type: String
+  ExternalAccountId:
+    Type: String
+
+Globals:
+  Function:
+    Runtime: python3.8
+    Timeout: 30
+    Handler: index.lambda_handler
+
+Resources:
+  DstBucketKey:
+    Type: AWS::KMS::Key
+    Properties:
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: key-default-1
+        Statement:
+        - Sid: B
+          Effect: Allow
+          Principal:
+            AWS: !Sub 'arn:aws:iam::${ExternalAccountId}:root'
+          Action: kms:*
+          Resource: '*'
+        - Sid: A
+          Effect: Allow
+          Principal:
+            AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          Action: kms:*
+          Resource: '*'
+
+  DstBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref DstBucketName
+      AccessControl: BucketOwnerFullControl
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DstBucketKey
+
+  #================================================
+  # Function
+
+  DstTestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          SharedBucketName: !Ref DstBucketName
+      CodeUri: lambda/test_dst
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: "*"
+              Resource: "*"
