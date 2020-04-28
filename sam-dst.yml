@@ -48,6 +48,18 @@ Resources:
               SSEAlgorithm: aws:kms
               KMSMasterKeyID: !Ref DstBucketKey
 
+  DstBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DstBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: '*'
+            Resource: !Sub arn:aws:s3:::${DstBucketName}/sources/*
+            Principal:
+              AWS: !Sub arn:aws:iam::${ExternalAccountId}:root
+
   #================================================
   # Function
 
