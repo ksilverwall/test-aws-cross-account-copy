@@ -56,7 +56,9 @@ Resources:
         Statement:
           - Effect: Allow
             Action: '*'
-            Resource: !Sub arn:aws:s3:::${DstBucketName}/sources/*
+            Resource:
+              - !Sub arn:aws:s3:::${DstBucketName}
+              - !Sub arn:aws:s3:::${DstBucketName}/*
             Principal:
               AWS: !Sub arn:aws:iam::${ExternalAccountId}:root
 
