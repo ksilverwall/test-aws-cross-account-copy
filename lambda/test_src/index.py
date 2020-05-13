@@ -22,6 +22,7 @@ def run(logger):
     s3.put_object(
         Bucket=dst_bucket ,
         Key=os.path.join(dst_prefix, 'sample.txt'),
+        ACL='bucket-owner-full-control',
         Body="ABCDEFG".encode('utf-8'),
         ServerSideEncryption='aws:kms',
         SSEKMSKeyId=kms_arn,
